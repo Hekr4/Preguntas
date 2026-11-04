@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#090a10" />
+  <title>Encuesta privada</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #090a10;
+      --panel: rgba(19, 21, 31, .92);
+      --panel-border: rgba(255,255,255,.11);
+      --text: #f4f4f7;
+      --muted: #a3a6b5;
+      --accent: #d8d9ff;
+      --accent-strong: #a7a9ff;
+      --danger: #ff9d9d;
+      --success: #9ee6bd;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px 16px;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.8) 50%, transparent 60%),
+        radial-gradient(1px 1px at 78% 14%, rgba(255,255,255,.65) 50%, transparent 60%),
+        radial-gradient(1.5px 1.5px at 88% 72%, rgba(255,255,255,.65) 50%, transparent 60%),
+        radial-gradient(1px 1px at 24% 84%, rgba(255,255,255,.55) 50%, transparent 60%),
+        radial-gradient(1px 1px at 52% 42%, rgba(255,255,255,.4) 50%, transparent 60%),
+        radial-gradient(ellipse at 50% 0%, #1b1d31 0%, var(--bg) 58%);
+      background-size: 230px 230px, 310px 310px, 280px 280px, 350px 350px, 190px 190px, auto;
+    }
+    .card {
+      width: min(100%, 480px);
+      padding: clamp(26px, 6vw, 42px);
+      border: 1px solid var(--panel-border);
+      border-radius: 26px;
+      background: var(--panel);
+      box-shadow: 0 24px 80px rgba(0,0,0,.48), 0 0 42px rgba(140,143,255,.07);
+      backdrop-filter: blur(14px);
+    }
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 11px;
+      border: 1px solid rgba(216,217,255,.18);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+    .eyebrow::before { content: "✦"; font-size: 12px; }
+    h1 { margin: 22px 0 10px; font-size: clamp(28px, 6vw, 36px); line-height: 1.12; letter-spacing: -.04em; }
+    .subtitle { margin: 0 0 28px; color: var(--muted); line-height: 1.6; font-size: 14px; }
+    .people { display: grid; gap: 11px; }
+    button, input { font: inherit; }
+    .person-button, .primary-button, .secondary-button {
+      width: 100%;
+      min-height: 52px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease, box-shadow .18s ease;
+    }
+    .person-button {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 17px;
+      color: var(--text);
+      background: rgba(255,255,255,.035);
+      border: 1px solid rgba(255,255,255,.1);
+      text-align: left;
+    }
+    .person-button:hover { transform: translateY(-2px); border-color: rgba(216,217,255,.45); background: rgba(167,169,255,.09); }
+    .person-button span:last-child { color: var(--accent); font-size: 20px; }
+    .field-label { display: block; margin: 0 0 9px; color: #d9d9e4; font-size: 13px; font-weight: 650; }
+    input[type="password"], input[type="text"] {
+      width: 100%;
+      min-height: 52px;
+      padding: 0 15px;
+      border: 1px solid rgba(255,255,255,.14);
+      border-radius: 13px;
+      outline: none;
+      background: rgba(0,0,0,.2);
+      color: var(--text);
+      font-size: 16px;
+    }
+    input:focus { border-color: var(--accent-strong); box-shadow: 0 0 0 3px rgba(167,169,255,.12); }
+    .primary-button {
+      margin-top: 16px;
+      border: 1px solid rgba(225,226,255,.6);
+      color: #11121b;
+      font-weight: 750;
+      background: linear-gradient(135deg, #f0f0ff, #b7b9ff);
+      box-shadow: 0 8px 24px rgba(167,169,255,.15);
+    }
+    .primary-button:hover { transform: translateY(-2px); box-shadow: 0 11px 28px rgba(167,169,255,.24); }
+    .primary-button:disabled { cursor: wait; opacity: .65; transform: none; }
+    .secondary-button {
+      margin-top: 12px;
+      min-height: 44px;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .secondary-button:hover { color: var(--text); border-color: rgba(255,255,255,.3); }
+    .message { min-height: 20px; margin: 12px 0 0; font-size: 13px; color: var(--danger); line-height: 1.45; }
+    .question { margin: 25px 0 12px; font-size: 21px; font-weight: 700; letter-spacing: -.02em; }
+    .hint { color: var(--muted); font-size: 13px; line-height: 1.55; }
+    .success-mark {
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      margin-bottom: 20px;
+      border: 1px solid rgba(158,230,189,.35);
+      border-radius: 50%;
+      color: var(--success);
+      background: rgba(158,230,189,.08);
+      font-size: 28px;
+    }
+    .saved-answer { margin-top: 18px; padding: 14px 16px; border: 1px solid rgba(255,255,255,.1); border-radius: 13px; background: rgba(255,255,255,.035); overflow-wrap: anywhere; }
+    .saved-answer small { display: block; margin-bottom: 6px; color: var(--muted); }
+    .hidden { display: none !important; }
+    .footer { margin: 22px 0 0; text-align: center; color: #777b8c; font-size: 11px; }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <section id="selectView">
+      <div class="eyebrow">Encuesta privada</div>
+      <h1>Bienvenido/a</h1>
+      <p class="subtitle">Elegí tu acceso para comenzar.</p>
+      <div class="people">
+        <button class="person-button" type="button" data-person="Persona 1"><span>Persona 1</span><span>→</span></button>
+        <button class="person-button" type="button" data-person="Persona 2"><span>Persona 2</span><span>→</span></button>
+        <button class="person-button" type="button" data-person="Persona 3"><span>Persona 3</span><span>→</span></button>
+      </div>
+    </section>
+
+    <section id="passwordView" class="hidden">
+      <div class="eyebrow">Acceso</div>
+      <h1>Hola, <span id="chosenPerson">Persona</span></h1>
+      <p class="subtitle">Ingresá la contraseña para entrar a la encuesta.</p>
+      <form id="loginForm">
+        <label class="field-label" for="passwordInput">Contraseña</label>
+        <input id="passwordInput" type="password" inputmode="numeric" autocomplete="off" placeholder="Ingresá la contraseña" required />
+        <button class="primary-button" id="loginButton" type="submit">Entrar</button>
+      </form>
+      <p class="message" id="loginMessage" role="status" aria-live="polite"></p>
+      <button class="secondary-button" id="backToPeople" type="button">Volver</button>
+    </section>
+
+    <section id="surveyView" class="hidden">
+      <div class="eyebrow">Encuesta</div>
+      <h1>Una pregunta para vos</h1>
+      <p class="subtitle" id="surveyGreeting">Estás respondiendo como Persona.</p>
+      <form id="answerForm">
+        <label class="field-label" for="answerInput">Tu respuesta</label>
+        <p class="question">¿Cómo te llamás?</p>
+        <input id="answerInput" type="text" maxlength="300" autocomplete="name" placeholder="Escribí tu nombre..." required />
+        <button class="primary-button" id="submitButton" type="submit">Enviar respuesta</button>
+      </form>
+      <p class="message" id="submitMessage" role="status" aria-live="polite"></p>
+      <button class="secondary-button" id="logoutButton" type="button">Volver al inicio</button>
+    </section>
+
+    <section id="successView" class="hidden">
+      <div class="success-mark">✓</div>
+      <div class="eyebrow">Respuesta registrada</div>
+      <h1>¡Muchas gracias!</h1>
+      <p class="subtitle">Tu respuesta quedó guardada correctamente.</p>
+      <div class="saved-answer"><small>Tu respuesta</small><strong id="finalAnswer"></strong></div>
+      <button class="primary-button" id="finishButton" type="button">Volver al inicio</button>
+    </section>
+
+    <p class="footer">Tus respuestas se guardan de forma centralizada.</p>
+  </main>
+
+  <iframe name="responseFrame" id="responseFrame" title="Respuesta del servidor" class="hidden"></iframe>
+
+  <script>
+    // Pegá aquí la URL de implementación de Google Apps Script.
+    const APPS_SCRIPT_URL = "PEGAR_URL_DE_APPS_SCRIPT_AQUI";
+
+    const views = ["selectView", "passwordView", "surveyView", "successView"];
+    const frame = document.getElementById("responseFrame");
+    let selectedPerson = "";
+    let sessionToken = "";
+    let pendingNonce = "";
+    let pendingAction = "";
+
+    function showView(id) {
+      views.forEach(viewId => document.getElementById(viewId).classList.toggle("hidden", viewId !== id));
+    }
+
+    function makeNonce() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return String(Date.now()) + "-" + Math.random().toString(36).slice(2);
+    }
+
+    function sendToBackend(fields, action) {
+      pendingNonce = makeNonce();
+      pendingAction = action;
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = APPS_SCRIPT_URL;
+      form.target = "responseFrame";
+      form.style.display = "none";
+      const values = { ...fields, action, nonce: pendingNonce };
+      Object.entries(values).forEach(([name, value]) => {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = name;
+        input.value = String(value);
+        form.appendChild(input);
+      });
+      document.body.appendChild(form);
+      form.submit();
+      form.remove();
+    }
+
+    function showConfigurationError(messageElement) {
+      messageElement.textContent = "Falta conectar Google Sheets. Seguí las instrucciones del archivo LEEME.md.";
+    }
+
+    document.querySelectorAll("[data-person]").forEach(button => {
+      button.addEventListener("click", () => {
+        selectedPerson = button.dataset.person;
+        document.getElementById("chosenPerson").textContent = selectedPerson;
+        document.getElementById("passwordInput").value = "";
+        document.getElementById("loginMessage").textContent = "";
+        showView("passwordView");
+        document.getElementById("passwordInput").focus();
+      });
+    });
+
+    document.getElementById("loginForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const message = document.getElementById("loginMessage");
+      const button = document.getElementById("loginButton");
+      if (!APPS_SCRIPT_URL.startsWith("https://script.google.com/macros/s/")) {
+        showConfigurationError(message);
+        return;
+      }
+      button.disabled = true;
+      button.textContent = "Verificando...";
+      message.textContent = "";
+      sendToBackend({ person: selectedPerson, password: document.getElementById("passwordInput").value }, "login");
+    });
+
+    document.getElementById("answerForm").addEventListener("submit", event => {
+      event.preventDefault();
+      const answer = document.getElementById("answerInput").value.trim();
+      const message = document.getElementById("submitMessage");
+      const button = document.getElementById("submitButton");
+      if (!answer) {
+        message.textContent = "Escribí una respuesta antes de continuar.";
+        return;
+      }
+      button.disabled = true;
+      button.textContent = "Guardando...";
+      message.textContent = "";
+      sendToBackend({ person: selectedPerson, session: sessionToken, answer }, "submit");
+    });
+
+    window.addEventListener("message", event => {
+      if (event.source !== frame.contentWindow) return;
+      const data = event.data;
+      if (!data || data.nonce !== pendingNonce) return;
+
+      if (pendingAction === "login" && data.type === "survey-login-result") {
+        const button = document.getElementById("loginButton");
+        button.disabled = false;
+        button.textContent = "Entrar";
+        if (!data.ok) {
+          document.getElementById("loginMessage").textContent = data.message || "La contraseña no es correcta.";
+          return;
+        }
+        sessionToken = data.session;
+        document.getElementById("surveyGreeting").textContent = "Estás respondiendo como " + selectedPerson + ".";
+        document.getElementById("answerInput").value = "";
+        document.getElementById("submitMessage").textContent = "";
+        showView("surveyView");
+        document.getElementById("answerInput").focus();
+      }
+
+      if (pendingAction === "submit" && data.type === "survey-submit-result") {
+        const button = document.getElementById("submitButton");
+        button.disabled = false;
+        button.textContent = "Enviar respuesta";
+        if (!data.ok) {
+          document.getElementById("submitMessage").textContent = data.message || "No se pudo guardar. Volvé a intentar.";
+          return;
+        }
+        document.getElementById("finalAnswer").textContent = document.getElementById("answerInput").value.trim();
+        showView("successView");
+      }
+    });
+
+    function returnHome() {
+      selectedPerson = "";
+      sessionToken = "";
+      document.getElementById("passwordInput").value = "";
+      document.getElementById("answerInput").value = "";
+      showView("selectView");
+    }
+
+    document.getElementById("backToPeople").addEventListener("click", returnHome);
+    document.getElementById("logoutButton").addEventListener("click", returnHome);
+    document.getElementById("finishButton").addEventListener("click", returnHome);
+  </script>
+</body>
+</html>
